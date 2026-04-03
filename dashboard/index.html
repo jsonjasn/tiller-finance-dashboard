@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-stale="false">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1024">
+  <title>Budget Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <style>
+    /* ── Themes ─────────────────────────────────────────────── */
+    [data-theme="dark"] {
+      --bg:              #0f1117;
+      --surface:         #1a1d27;
+      --border:          rgba(255,255,255,0.08);
+      --text-primary:    #f0f0f5;
+      --text-secondary:  #8b8fa8;
+      --green:           #4ade80;
+      --yellow:          #fbbf24;
+      --red:             #f87171;
+      --blue:            #60a5fa;
+      --surface-hover:   rgba(255,255,255,0.04);
+      --stale-bg:        rgba(251,191,36,0.08);
+      --stale-border:    rgba(251,191,36,0.25);
+      --green-tint:      rgba(74, 222, 128, 0.12);
+      --yellow-tint:     rgba(251, 191, 36, 0.12);
+      --red-tint:        rgba(248, 113, 113, 0.12);
+      --blue-tint:       rgba(96, 165, 250, 0.12);
+      --goal-payoff-accent: rgba(96, 165, 250, 0.08);
+      --goal-savings-accent: rgba(74, 222, 128, 0.08);
+    }
+
+    [data-theme="light"] {
+      --bg:              #f8f7f4;
+      --surface:         #ffffff;
+      --border:          rgba(0,0,0,0.08);
+      --text-primary:    #1a1a2e;
+      --text-secondary:  #6b6f85;
+      --green:           #16a34a;
+      --yellow:          #d97706;
+      --red:             #dc2626;
+      --blue:            #2563eb;
+      --surface-hover:   rgba(0,0,0,0.03);
+      --stale-bg:        rgba(217,119,6,0.07);
+      --stale-border:    rgba(217,119,6,0.22);
+      --green-tint:      rgba(22, 163, 74, 0.12);
+      --yellow-tint:     rgba(217, 119, 6, 0.12);
+      --red-tint:        rgba(220, 38, 38, 0.12);
+      --blue-tint:       rgba(37, 99, 235, 0.12);
+      --goal-payoff-accent: rgba(37, 99, 235, 0.08);
+      --goal-savings-accent: rgba(22, 163, 74, 0.08);
+    }
+
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 1024px;
+      height: 768px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Geist', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout Shell ───────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 18px 20px 12px;
+      gap: 14px;
+    }
+
+    /* ── Loading State ──────────────────────────────────────── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.4s ease;
+    }
+
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .loading-wordmark {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .loading-pulse {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .loading-pulse span {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+
+    .loading-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse-dot {
+      0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Status Bar (top of page) ───────────────────────────── */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    #wordmark {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+
+    #status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #stale-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      background: var(--stale-bg);
+      border: 1px solid var(--stale-border);
+      border-radius: 3px;
+      padding: 3px 7px;
+    }
+
+    [data-stale="true"] #stale-badge {
+      display: flex;
+    }
+
+    .stale-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--yellow);
+      animation: stale-blink 2s ease-in-out infinite;
+    }
+
+    @keyframes stale-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    #refresh-indicator {
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #refresh-indicator::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border: 1.5px solid var(--text-secondary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Metric Row ─────────────────────────────────────────── */
+    #metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--metric-accent, var(--border));
+      opacity: 0.9;
+    }
+
+    .metric-card.status-green { --metric-accent: var(--green); }
+    .metric-card.status-yellow { --metric-accent: var(--yellow); }
+    .metric-card.status-red { --metric-accent: var(--red); }
+    .metric-card.status-blue { --metric-accent: var(--blue); }
+
+    .metric-label {
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-family: 'Geist Mono', monospace;
+      font-size: 34px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .metric-value.colored {
+      color: var(--metric-accent, var(--text-primary));
+    }
+
+    .metric-subtext {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-top: 5px;
+      letter-spacing: 0.01em;
+    }
+
+    .metric-subtext strong {
+      font-weight: 500;
+      color: var(--metric-accent, var(--text-secondary));
+    }
+
+    /* ── Category Grid ──────────────────────────────────────── */
+    #category-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .section-label {
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+
+    #category-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cat-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--cat-color, var(--text-secondary));
+    }
+
+    .cat-status-dot.status-green { --cat-color: var(--green); background: var(--green); }
+    .cat-status-dot.status-yellow {
+      background: var(--yellow);
+      animation: dot-pulse 2s ease-in-out infinite;
+    }
+    .cat-status-dot.status-red {
+      background: var(--red);
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
+    .cat-amounts {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .cat-spent {
+      font-family: 'Geist Mono', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .cat-sep {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      opacity: 0.4;
+    }
+
+    .cat-budget {
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: -0.01em;
+    }
+
+    .cat-tag {
+      font-family: 'Geist Mono', monospace;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 2px 5px;
+      border-radius: 2px;
+    }
+
+    .cat-tag.pacing {
+      color: var(--yellow);
+      background: var(--yellow-tint);
+      border: 1px solid var(--yellow-tint);
+    }
+
+    .cat-tag.over {
+      color: var(--red);
+      background: var(--red-tint);
+      border: 1px solid var(--red-tint);
+    }
+
+    .cat-progress-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .cat-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--fill-color, var(--green));
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cat-progress-fill.status-green { background: var(--green); }
+    .cat-progress-fill.status-yellow { background: var(--yellow); }
+    .cat-progress-fill.status-red { background: var(--red); }
+
+    /* ── Goals Section ──────────────────────────────────────── */
+    #goals-section {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    #goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .goal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .goal-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle at top right, var(--goal-accent, transparent), transparent 70%);
+      pointer-events: none;
+    }
+
+    .goal-card.type-payoff  { --goal-accent: var(--goal-payoff-accent); }
+    .goal-card.type-savings { --goal-accent: var(--goal-savings-accent); }
+
+    .goal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .goal-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: 0.01em;
+    }
+
+    .goal-type-badge {
+      font-family: 'Geist Mono', monospace;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 5px;
+      border-radius: 2px;
+    }
+
+    .goal-type-badge.payoff {
+      color: var(--blue);
+      background: var(--blue-tint);
+      border: 1px solid var(--blue-tint);
+    }
+
+    .goal-type-badge.savings {
+      color: var(--green);
+      background: var(--green-tint);
+      border: 1px solid var(--green-tint);
+    }
+
+    .goal-main-value {
+      font-family: 'Geist Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .goal-main-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+
+    .goal-progress-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .goal-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .goal-progress-fill.payoff { background: var(--blue); }
+    .goal-progress-fill.savings { background: var(--green); }
+
+    .goal-meta {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .goal-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .goal-stat-value {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .goal-stat-label {
+      font-size: 9px;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .goal-on-track {
+      margin-left: auto;
+      font-family: 'Geist Mono', monospace;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+
+    .goal-on-track.on { color: var(--green); background: var(--green-tint); border: 1px solid var(--green-tint); }
+    .goal-on-track.off { color: var(--yellow); background: var(--yellow-tint); border: 1px solid var(--yellow-tint); }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    #footer {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-shrink: 0;
+      height: 18px;
+    }
+
+    #footer-updated {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      opacity: 0.5;
+      letter-spacing: 0.04em;
+    }
+
+    #footer-lag {
+      font-size: 10px;
+      color: var(--text-secondary);
+      opacity: 0.35;
+      letter-spacing: 0.02em;
+    }
+
+    #footer-sep {
+      width: 1px;
+      height: 10px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    /* ── No-data State ──────────────────────────────────────── */
+    #no-data {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #no-data.visible {
+      display: flex;
+    }
+
+    .no-data-label {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading screen (hidden once data loads) -->
+<div id="loading-screen">
+  <div class="loading-inner">
+    <div class="loading-wordmark">Tiller Dashboard</div>
+    <div class="loading-pulse">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <div id="wordmark">Tiller</div>
+    <div id="status-bar-right">
+      <div id="stale-badge">
+        <span class="stale-dot"></span>
+        Cached data
+      </div>
+      <div id="refresh-indicator">Refreshing</div>
+    </div>
+  </div>
+
+  <!-- Metric row: Runway / Spent / Remaining -->
+  <div id="metric-row">
+    <div class="metric-card status-blue" id="metric-runway">
+      <div class="metric-label">Runway</div>
+      <div class="metric-value colored" id="runway-value">—</div>
+      <div class="metric-subtext" id="runway-sub"></div>
+    </div>
+    <div class="metric-card" id="metric-spent">
+      <div class="metric-label">Spent this month</div>
+      <div class="metric-value" id="spent-value">—</div>
+      <div class="metric-subtext" id="spent-sub"></div>
+    </div>
+    <div class="metric-card" id="metric-remaining">
+      <div class="metric-label">Remaining</div>
+      <div class="metric-value" id="remaining-value">—</div>
+      <div class="metric-subtext" id="remaining-sub"></div>
+    </div>
+  </div>
+
+  <!-- Category watch grid -->
+  <div id="category-section">
+    <div class="section-label">Categories</div>
+    <div id="category-grid"></div>
+  </div>
+
+  <!-- Goals section -->
+  <div id="goals-section">
+    <div class="section-label">Goals</div>
+    <div id="goals-grid"></div>
+  </div>
+
+  <!-- No-data fallback -->
+  <div id="no-data">
+    <div class="no-data-label">Waiting for data</div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer">
+    <div id="footer-updated"></div>
+    <div id="footer-sep"></div>
+    <div id="footer-lag">Tiller data may lag 1–3 days</div>
+  </div>
+
+</div>
+
+<script>
+/* ── Data fetching ────────────────────────────────────────────── */
+
+async function fetchData() {
+  try {
+    const res = await fetch(CONFIG.appsScriptUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    localStorage.setItem('tiller_cache', JSON.stringify(data));
+    localStorage.removeItem('tiller_stale');
+    return data;
+  } catch (err) {
+    const cached = localStorage.getItem('tiller_cache');
+    if (cached) {
+      localStorage.setItem('tiller_stale', '1');
+      return JSON.parse(cached);
+    }
+    return null;
+  }
+}
+
+/* ── Formatters ───────────────────────────────────────────────── */
+
+function formatCurrency(n) {
+  return new Intl.NumberFormat(CONFIG.currencyLocale, {
+    style: 'currency',
+    currency: CONFIG.currencyCode,
+    maximumFractionDigits: 0
+  }).format(n);
+}
+
+/* ── Status logic ─────────────────────────────────────────────── */
+
+// Returns 'green' | 'yellow' | 'red'
+function categoryStatus(cat, data) {
+  const { spent, budget } = data.categories[cat.name] || { spent: 0, budget: 0 };
+  if (budget === 0) return 'green';
+  const pctElapsed = data.dayOfMonth / data.daysInMonth;
+  const pctSpent = spent / budget;
+  if (spent >= budget) return 'red';
+  if (cat.showPacingTag && pctSpent > pctElapsed + (cat.yellowThreshold || 0.15)) return 'yellow';
+  return 'green';
+}
+
+// Returns 'green' | 'yellow' | 'red'
+function runwayStatus(data) {
+  if (data.dayOfMonth === 0 || data.totalSpent === 0) return 'green';
+  const totalBudget = CONFIG.budgetCalculation === 'manual'
+    ? CONFIG.manualMonthlyBudget
+    : data.totalBudget;
+  const remaining = totalBudget - data.totalSpent;
+  const daysLeft = data.daysInMonth - data.dayOfMonth;
+  const dailyBurn = data.totalSpent / data.dayOfMonth;
+  const runway = dailyBurn > 0 ? remaining / dailyBurn : 999;
+  if (runway >= daysLeft) return 'green';
+  if (runway > 5) return 'yellow';
+  return 'red';
+}
+
+function runwayDays(data) {
+  if (data.dayOfMonth === 0 || data.totalSpent === 0) return data.daysInMonth - data.dayOfMonth;
+  const totalBudget = CONFIG.budgetCalculation === 'manual'
+    ? CONFIG.manualMonthlyBudget
+    : data.totalBudget;
+  const remaining = totalBudget - data.totalSpent;
+  const dailyBurn = data.totalSpent / data.dayOfMonth;
+  return dailyBurn > 0 ? Math.round(remaining / dailyBurn) : data.daysInMonth - data.dayOfMonth;
+}
+
+/* ── Goal helpers ─────────────────────────────────────────────── */
+
+function goalBalance(goal, data) {
+  if (goal.balanceSource === 'tiller' && data.balances && data.balances[goal.tillerAccountName] !== undefined) {
+    return data.balances[goal.tillerAccountName];
+  }
+  return goal.manualBalance;
+}
+
+function payoffProgress(goal, data) {
+  const balance = goalBalance(goal, data);
+  const paid = goal.totalAmount - balance;
+  const start = new Date(goal.startDate);
+  const now = new Date();
+  const monthsElapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+  const requiredPaid = goal.monthlyPayment * monthsElapsed;
+  const deadlineDate = new Date(start);
+  deadlineDate.setMonth(deadlineDate.getMonth() + goal.months);
+  const monthsLeft = Math.max(0,
+    (deadlineDate.getFullYear() - now.getFullYear()) * 12 +
+    (deadlineDate.getMonth() - now.getMonth())
+  );
+  return {
+    balance,
+    paid: Math.max(0, paid),
+    pct: Math.min(1, Math.max(0, paid / goal.totalAmount)),
+    onTrack: paid >= requiredPaid,
+    monthsLeft,
+    deadlineDate
+  };
+}
+
+function savingsProgress(goal, data) {
+  const balance = goalBalance(goal, data);
+  const monthsLeft = goal.monthlyContribution > 0
+    ? Math.ceil((goal.targetAmount - balance) / goal.monthlyContribution)
+    : null;
+  return {
+    balance,
+    pct: Math.min(1, Math.max(0, balance / goal.targetAmount)),
+    monthsLeft: monthsLeft === null ? null : Math.max(0, monthsLeft)
+  };
+}
+
+/* ── UI helpers ───────────────────────────────────────────────── */
+
+function showRefreshing(visible) {
+  document.getElementById('refresh-indicator').style.opacity = visible ? '1' : '0';
+}
+
+function setStatusClass(el, status) {
+  el.classList.remove('status-green', 'status-yellow', 'status-red', 'status-blue');
+  if (status) el.classList.add('status-' + status);
+}
+
+/* ── Renderers ────────────────────────────────────────────────── */
+
+function renderMetrics(data) {
+  const totalBudget = CONFIG.budgetCalculation === 'manual'
+    ? CONFIG.manualMonthlyBudget
+    : data.totalBudget;
+  const remaining = totalBudget - data.totalSpent;
+  const days = runwayDays(data);
+  const rStatus = runwayStatus(data);
+  const daysLeft = data.daysInMonth - data.dayOfMonth;
+
+  // Runway
+  const runwayCard = document.getElementById('metric-runway');
+  setStatusClass(runwayCard, rStatus);
+  document.getElementById('runway-value').textContent = days + 'd';
+  document.getElementById('runway-sub').innerHTML =
+    '<strong>' + daysLeft + ' days</strong> left in ' + data.month;
+
+  // Spent
+  const spentCard = document.getElementById('metric-spent');
+  document.getElementById('spent-value').textContent = formatCurrency(data.totalSpent);
+  const burnRate = data.dayOfMonth > 0 ? data.totalSpent / data.dayOfMonth : 0;
+  document.getElementById('spent-sub').textContent =
+    formatCurrency(Math.round(burnRate)) + '/day avg  ·  Day ' + data.dayOfMonth;
+
+  // Remaining
+  const remCard = document.getElementById('metric-remaining');
+  const remStatus = remaining < 0 ? 'red' : remaining < totalBudget * 0.1 ? 'yellow' : null;
+  setStatusClass(remCard, remStatus);
+  document.getElementById('remaining-value').textContent = formatCurrency(remaining);
+  document.getElementById('remaining-sub').textContent =
+    'of ' + formatCurrency(totalBudget) + ' budget';
+}
+
+function renderCategories(data) {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+
+  (CONFIG.watchCategories || []).forEach(cat => {
+    const catData = data.categories[cat.name] || { spent: 0, budget: 0 };
+    const { spent, budget } = catData;
+    const status = categoryStatus(cat, data);
+    const pct = budget > 0 ? Math.min(1, spent / budget) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+
+    let tagHtml = '';
+    if (status === 'yellow') {
+      tagHtml = '<span class="cat-tag pacing">Pacing high</span>';
+    } else if (status === 'red') {
+      tagHtml = '<span class="cat-tag over">Over budget</span>';
+    }
+
+    card.innerHTML = `
+      <div class="cat-card-header">
+        <span class="cat-name">${escHtml(cat.name)}</span>
+        <span class="cat-status-dot status-${status}"></span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+        <div class="cat-amounts">
+          <span class="cat-spent">${formatCurrency(spent)}</span>
+          <span class="cat-sep">/</span>
+          <span class="cat-budget">${formatCurrency(budget)}</span>
+        </div>
+        ${tagHtml}
+      </div>
+      <div class="cat-progress-track">
+        <div class="cat-progress-fill status-${status}" style="width:${(pct * 100).toFixed(1)}%"></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderGoals(data) {
+  const grid = document.getElementById('goals-grid');
+  grid.innerHTML = '';
+
+  (CONFIG.goals || []).forEach(goal => {
+    const card = document.createElement('div');
+    card.className = 'goal-card type-' + goal.type;
+
+    if (goal.type === 'payoff') {
+      const p = payoffProgress(goal, data);
+      const onTrackClass = p.onTrack ? 'on' : 'off';
+      const onTrackLabel = p.onTrack ? 'On track' : 'Behind';
+      card.innerHTML = `
+        <div class="goal-header">
+          <span class="goal-label">${escHtml(goal.label)}</span>
+          <span class="goal-type-badge payoff">Payoff</span>
+        </div>
+        <div>
+          <div class="goal-main-value">${formatCurrency(p.balance)}</div>
+          <div class="goal-main-label">balance remaining</div>
+        </div>
+        <div class="goal-progress-track">
+          <div class="goal-progress-fill payoff" style="width:${(p.pct * 100).toFixed(1)}%"></div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-stat">
+            <span class="goal-stat-value">${formatCurrency(goal.monthlyPayment)}</span>
+            <span class="goal-stat-label">/ month</span>
+          </div>
+          <div class="goal-stat">
+            <span class="goal-stat-value">${p.monthsLeft}</span>
+            <span class="goal-stat-label">mo left</span>
+          </div>
+          <div class="goal-stat">
+            <span class="goal-stat-value">${formatCurrency(p.paid)}</span>
+            <span class="goal-stat-label">paid</span>
+          </div>
+          <span class="goal-on-track ${onTrackClass}">${onTrackLabel}</span>
+        </div>
+      `;
+    } else if (goal.type === 'savings') {
+      const p = savingsProgress(goal, data);
+      card.innerHTML = `
+        <div class="goal-header">
+          <span class="goal-label">${escHtml(goal.label)}</span>
+          <span class="goal-type-badge savings">Savings</span>
+        </div>
+        <div>
+          <div class="goal-main-value">${formatCurrency(p.balance)}</div>
+          <div class="goal-main-label">of ${formatCurrency(goal.targetAmount)} target</div>
+        </div>
+        <div class="goal-progress-track">
+          <div class="goal-progress-fill savings" style="width:${(p.pct * 100).toFixed(1)}%"></div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-stat">
+            <span class="goal-stat-value">${formatCurrency(goal.monthlyContribution)}</span>
+            <span class="goal-stat-label">/ month</span>
+          </div>
+          ${p.monthsLeft !== null ? `
+          <div class="goal-stat">
+            <span class="goal-stat-value">${p.monthsLeft}</span>
+            <span class="goal-stat-label">mo to goal</span>
+          </div>` : ''}
+          <div class="goal-stat">
+            <span class="goal-stat-value">${formatCurrency(goal.targetAmount - p.balance)}</span>
+            <span class="goal-stat-label">to go</span>
+          </div>
+        </div>
+      `;
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function renderFooter(data, isStale) {
+  if (!CONFIG.showLastUpdated) return;
+  const updatedEl = document.getElementById('footer-updated');
+  document.getElementById('footer').style.display = 'flex';
+  const asOf = data.asOf ? new Date(data.asOf) : new Date();
+  const timeStr = asOf.toLocaleTimeString(CONFIG.currencyLocale, { hour: 'numeric', minute: '2-digit' });
+  updatedEl.textContent = 'last updated ' + timeStr + (isStale ? ' (cached)' : '');
+}
+
+/* ── Main render ──────────────────────────────────────────────── */
+
+function render(data, isStale) {
+  document.documentElement.dataset.stale = isStale ? 'true' : 'false';
+  renderMetrics(data);
+  renderCategories(data);
+  renderGoals(data);
+  renderFooter(data, isStale);
+}
+
+/* ── Init & refresh loop ──────────────────────────────────────── */
+
+async function init() {
+  document.documentElement.setAttribute('data-theme', CONFIG.theme || 'dark');
+
+  showRefreshing(true);
+  const data = await fetchData();
+  showRefreshing(false);
+
+  const loadingScreen = document.getElementById('loading-screen');
+
+  if (data) {
+    render(data, !!localStorage.getItem('tiller_stale'));
+    loadingScreen.classList.add('hidden');
+    setTimeout(() => { loadingScreen.style.display = 'none'; }, 450);
+  } else {
+    loadingScreen.classList.add('hidden');
+    setTimeout(() => { loadingScreen.style.display = 'none'; }, 450);
+    document.getElementById('no-data').classList.add('visible');
+    document.getElementById('metric-row').style.display = 'none';
+    document.getElementById('category-section').style.display = 'none';
+    document.getElementById('goals-section').style.display = 'none';
+  }
+
+  startRefresh();
+}
+
+function startRefresh() {
+  setInterval(async () => {
+    showRefreshing(true);
+    const data = await fetchData();
+    showRefreshing(false);
+    if (data) {
+      document.getElementById('no-data').classList.remove('visible');
+      document.getElementById('metric-row').style.display = '';
+      document.getElementById('category-section').style.display = '';
+      document.getElementById('goals-section').style.display = '';
+      render(data, !!localStorage.getItem('tiller_stale'));
+    }
+  }, CONFIG.refreshIntervalMinutes * 60 * 1000);
+}
+
+/* ── Utility ──────────────────────────────────────────────────── */
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ── Boot ─────────────────────────────────────────────────────── */
+init();
+</script>
+</body>
+</html>

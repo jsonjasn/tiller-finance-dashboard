@@ -1,0 +1,6 @@
+# User config — contains your Apps Script URL, never commit to a public repo
+dashboard/config.js
+
+# OS files
+.DS_Store
+Thumbs.db
