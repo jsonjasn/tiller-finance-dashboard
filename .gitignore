@@ -1,6 +1,9 @@
 # User config — contains your Apps Script URL, never commit to a public repo
 dashboard/config.js
 
+# Local deploy config — NAS connection details
+.env
+
 # OS files
 .DS_Store
 Thumbs.db
