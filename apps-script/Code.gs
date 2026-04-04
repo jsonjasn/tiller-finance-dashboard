@@ -42,17 +42,23 @@ function getData() {
   if (!catSheet) throw new Error('Sheet not found: "Categories". Check the tab name in your Tiller spreadsheet.');
   var catRows = catSheet.getDataRange().getValues();
 
-  var categoryType = {};   // name -> 'Income' | 'Expense' | 'Transfer'
-  var categoryBudget = {}; // name -> budget amount (positive number)
+  var categoryType = {};
+  var categoryBudget = {};
+  var categoryGroup = {};  // name -> group string
+  var groupBudget = { Bills: 0, Living: 0, Discretionary: 0 };
 
-  // Row 0 is the header row
   for (var i = 1; i < catRows.length; i++) {
     var name = String(catRows[i][0]).trim();
+    var group = String(catRows[i][1]).trim();
     var type = String(catRows[i][2]).trim();
     var budget = catRows[i][budgetColIndex];
     if (!name) continue;
     categoryType[name] = type;
+    categoryGroup[name] = group;
     categoryBudget[name] = Math.abs(Number(budget) || 0);
+    if (type === 'Expense' && groupBudget.hasOwnProperty(group)) {
+      groupBudget[group] += Math.abs(Number(budget) || 0);
+    }
   }
 
   // ── Transactions tab ────────────────────────────────────
@@ -63,7 +69,19 @@ function getData() {
   if (!txSheet) throw new Error('Sheet not found: "Transactions". Check the tab name in your Tiller spreadsheet.');
   var txRows = txSheet.getDataRange().getValues();
 
-  var spending = {}; // category name -> total spent this month (positive)
+  var spending = {};
+  // groupSpending[monthKey] = { Bills: 0, Living: 0, Discretionary: 0 }
+  // monthKey = 'YYYY-M' (e.g. '2026-3' for April, month index 3)
+  var groupSpending = {};
+
+  // Pre-populate entries for current month and past 6 months
+  for (var m = 0; m <= 6; m++) {
+    var mIdx = month - m;
+    var mYear = year;
+    if (mIdx < 0) { mIdx += 12; mYear -= 1; }
+    var key = mYear + '-' + mIdx;
+    groupSpending[key] = { Bills: 0, Living: 0, Discretionary: 0 };
+  }
 
   for (var j = 2; j < txRows.length; j++) {
     var row = txRows[j];
@@ -72,13 +90,27 @@ function getData() {
     var amount = Number(row[5]);
 
     if (!txDate || !category || isNaN(amount)) continue;
-    if (amount >= 0) continue;                           // only expenses (negative)
-    if (categoryType[category] !== 'Expense') continue; // only Expense type
+    if (amount >= 0) continue;
+    if (categoryType[category] !== 'Expense') continue;
 
     var d = (txDate instanceof Date) ? txDate : new Date(txDate);
-    if (d.getFullYear() !== year || d.getMonth() !== month) continue; // current month only
+    var dYear = d.getFullYear();
+    var dMonth = d.getMonth();
+    var dDay = d.getDate();
 
-    spending[category] = (spending[category] || 0) + Math.abs(amount);
+    // Current month: full spending for categories result
+    if (dYear === year && dMonth === month) {
+      spending[category] = (spending[category] || 0) + Math.abs(amount);
+    }
+
+    // Group spending: current month + past 6, up to same day-of-month
+    var key = dYear + '-' + dMonth;
+    if (groupSpending.hasOwnProperty(key) && dDay <= day) {
+      var grp = categoryGroup[category];
+      if (grp && groupSpending[key].hasOwnProperty(grp)) {
+        groupSpending[key][grp] += Math.abs(amount);
+      }
+    }
   }
 
   // ── Build categories result ─────────────────────────────
@@ -98,6 +130,42 @@ function getData() {
     totalBudget += categoryBudget[cat];
     totalSpent += spent;
   }
+
+  // ── Build groups result ─────────────────────────────────
+  var TARGET_GROUPS = ['Bills', 'Living', 'Discretionary'];
+  var currentKey = year + '-' + month;
+
+  // Last month key
+  var lmIdx = month - 1;
+  var lmYear = year;
+  if (lmIdx < 0) { lmIdx = 11; lmYear -= 1; }
+  var lastMonthKey = lmYear + '-' + lmIdx;
+
+  var groups = {};
+  TARGET_GROUPS.forEach(function(grp) {
+    var sixMonthTotal = 0;
+    var sixMonthCount = 0;
+    for (var m = 1; m <= 6; m++) {
+      var mIdx = month - m;
+      var mYear = year;
+      if (mIdx < 0) { mIdx += 12; mYear -= 1; }
+      var k = mYear + '-' + mIdx;
+      if (groupSpending[k]) {
+        sixMonthTotal += groupSpending[k][grp] || 0;
+        sixMonthCount++;
+      }
+    }
+    var sixMonthAvg = sixMonthCount > 0 ? sixMonthTotal / sixMonthCount : 0;
+    var lastMonthSpent = (groupSpending[lastMonthKey] && groupSpending[lastMonthKey][grp]) || 0;
+    var currentSpent = (groupSpending[currentKey] && groupSpending[currentKey][grp]) || 0;
+
+    groups[grp] = {
+      spent: round2(currentSpent),
+      budget: round2(groupBudget[grp]),
+      lastMonth: round2(lastMonthSpent),
+      sixMonthAvg: round2(sixMonthAvg)
+    };
+  });
 
   // ── Balances tab ────────────────────────────────────────
   // Standard Tiller Balances columns: Account=0, Balance=1, ...
@@ -125,7 +193,8 @@ function getData() {
     categories: categories,
     totalBudget: round2(totalBudget),
     totalSpent: round2(totalSpent),
-    balances: balances
+    balances: balances,
+    groups: groups
   };
 }
 
