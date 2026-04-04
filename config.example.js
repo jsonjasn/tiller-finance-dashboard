@@ -87,6 +87,19 @@ const CONFIG = {
                                // dark  = recommended for ambient tablet display
                                // light = better for bright rooms / daytime
   refreshIntervalMinutes: 5,   // how often the dashboard auto-refreshes
+
+  // --- Spending History Comparison ---
+  // Which historical comparisons to show on group breakdown cards.
+  // 'both'          = show last month and 6-month average (default)
+  // 'last_month'    = show only vs last month
+  // 'six_month_avg' = show only vs 6-month average
+  historyComparison: 'both',
+
+  // --- Branding ---
+  // Customizes the browser tab title and the top-left wordmark on the dashboard.
+  pageTitle: 'Budget Dashboard',
+  headerWordmark: 'BUDGET DASHBOARD',
+
   showLastUpdated: true,       // show "last updated X:XX PM" footer
   currencyLocale: 'en-US',
   currencyCode: 'USD',
