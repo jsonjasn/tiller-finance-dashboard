@@ -221,73 +221,211 @@
       to { transform: rotate(360deg); }
     }
 
-    /* ── Metric Row ─────────────────────────────────────────── */
-    #metric-row {
+    /* ── Summary Bar ────────────────────────────────────────── */
+    #summary-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    #summary-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 16px;
+    }
+
+    #summary-bar-track {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .summary-seg {
+      height: 100%;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #summary-seg-bills          { background: var(--blue); }
+    #summary-seg-living         { background: var(--green); }
+    #summary-seg-discretionary  { background: var(--yellow); }
+
+    #summary-numbers {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    #summary-spent { color: var(--text-primary); }
+    #summary-left  { color: var(--text-secondary); }
+    .summary-dot   { color: var(--text-secondary); opacity: 0.4; }
+
+    #summary-legend {
+      display: flex;
+      gap: 12px;
+      padding: 0 2px;
+    }
+
+    .legend-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+    }
+
+    .legend-swatch {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+    }
+
+    .legend-pill.bills          .legend-swatch { background: var(--blue); }
+    .legend-pill.living         .legend-swatch { background: var(--green); }
+    .legend-pill.discretionary  .legend-swatch { background: var(--yellow); }
+
+    /* ── Group Cards ────────────────────────────────────────── */
+    #group-cards {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
       flex-shrink: 0;
     }
 
-    .metric-card {
+    .group-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 16px 20px 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       position: relative;
       overflow: hidden;
     }
 
-    .metric-card::before {
+    .group-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 2px;
-      background: var(--metric-accent, var(--border));
-      opacity: 0.9;
     }
 
-    .metric-card.status-green { --metric-accent: var(--green); }
-    .metric-card.status-yellow { --metric-accent: var(--yellow); }
-    .metric-card.status-red { --metric-accent: var(--red); }
-    .metric-card.status-blue { --metric-accent: var(--blue); }
+    #group-bills::before         { background: var(--blue); }
+    #group-living::before        { background: var(--green); }
+    #group-discretionary::before { background: var(--yellow); }
 
-    .metric-label {
+    .group-label {
       font-family: 'Geist Mono', monospace;
       font-size: 9px;
       font-weight: 500;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--text-secondary);
-      margin-bottom: 8px;
     }
 
-    .metric-value {
+    .group-amounts {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .group-spent {
       font-family: 'Geist Mono', monospace;
-      font-size: 34px;
+      font-size: 22px;
       font-weight: 600;
       line-height: 1;
-      color: var(--text-primary);
       letter-spacing: -0.02em;
+      color: var(--text-primary);
     }
 
-    .metric-value.colored {
-      color: var(--metric-accent, var(--text-primary));
+    .group-sep {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      opacity: 0.4;
     }
 
-    .metric-subtext {
-      font-size: 11px;
+    .group-budget {
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
       font-weight: 400;
       color: var(--text-secondary);
-      margin-top: 5px;
-      letter-spacing: 0.01em;
+      letter-spacing: -0.01em;
     }
 
-    .metric-subtext strong {
+    .group-progress-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .group-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .group-progress-fill.status-green  { background: var(--green); }
+    .group-progress-fill.status-yellow { background: var(--yellow); }
+    .group-progress-fill.status-red    { background: var(--red); }
+
+    .group-diffs {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .group-diff {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
       font-weight: 500;
-      color: var(--metric-accent, var(--text-secondary));
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .group-diff.better { color: var(--green); }
+    .group-diff.worse  { color: var(--red); }
+    .group-diff.neutral { color: var(--text-secondary); opacity: 0.6; }
+
+    .group-diff-label {
+      font-weight: 400;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .group-runway {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    .group-lag-note {
+      font-size: 9px;
+      color: var(--text-secondary);
+      opacity: 0.45;
+      letter-spacing: 0.02em;
+      margin-top: 1px;
     }
 
     /* ── Category Grid ──────────────────────────────────────── */
@@ -312,6 +450,7 @@
     #category-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 1fr;
       gap: 8px;
       flex: 1;
       min-height: 0;
@@ -672,23 +811,31 @@
     </div>
   </div>
 
-  <!-- Metric row: Runway / Spent / Remaining -->
-  <div id="metric-row">
-    <div class="metric-card status-blue" id="metric-runway">
-      <div class="metric-label">Runway</div>
-      <div class="metric-value colored" id="runway-value">—</div>
-      <div class="metric-subtext" id="runway-sub"></div>
+  <!-- Summary bar + group cards -->
+  <div id="summary-section">
+    <div id="summary-bar">
+      <div id="summary-bar-track">
+        <div id="summary-seg-bills" class="summary-seg"></div>
+        <div id="summary-seg-living" class="summary-seg"></div>
+        <div id="summary-seg-discretionary" class="summary-seg"></div>
+      </div>
+      <div id="summary-numbers">
+        <span id="summary-spent"></span>
+        <span class="summary-dot">·</span>
+        <span id="summary-left"></span>
+      </div>
     </div>
-    <div class="metric-card" id="metric-spent">
-      <div class="metric-label">Spent this month</div>
-      <div class="metric-value" id="spent-value">—</div>
-      <div class="metric-subtext" id="spent-sub"></div>
+    <div id="summary-legend">
+      <span class="legend-pill bills"><span class="legend-swatch"></span><span id="legend-bills-pct"></span></span>
+      <span class="legend-pill living"><span class="legend-swatch"></span><span id="legend-living-pct"></span></span>
+      <span class="legend-pill discretionary"><span class="legend-swatch"></span><span id="legend-disc-pct"></span></span>
     </div>
-    <div class="metric-card" id="metric-remaining">
-      <div class="metric-label">Remaining</div>
-      <div class="metric-value" id="remaining-value">—</div>
-      <div class="metric-subtext" id="remaining-sub"></div>
-    </div>
+  </div>
+
+  <div id="group-cards">
+    <div class="group-card" id="group-bills"></div>
+    <div class="group-card" id="group-living"></div>
+    <div class="group-card" id="group-discretionary"></div>
   </div>
 
   <!-- Category watch grid -->
@@ -843,36 +990,118 @@ function setStatusClass(el, status) {
 
 /* ── Renderers ────────────────────────────────────────────────── */
 
-function renderMetrics(data) {
-  const totalBudget = CONFIG.budgetCalculation === 'manual'
+function renderSummary(data) {
+  var totalBudget = CONFIG.budgetCalculation === 'manual'
     ? CONFIG.manualMonthlyBudget
     : data.totalBudget;
-  const remaining = totalBudget - data.totalSpent;
-  const days = runwayDays(data);
-  const rStatus = runwayStatus(data);
-  const daysLeft = data.daysInMonth - data.dayOfMonth;
+  var groups = data.groups || {};
 
-  // Runway
-  const runwayCard = document.getElementById('metric-runway');
-  setStatusClass(runwayCard, rStatus);
-  document.getElementById('runway-value').textContent = days + 'd';
-  document.getElementById('runway-sub').innerHTML =
-    '<strong>' + daysLeft + ' days</strong> left in ' + data.month;
+  // Segmented bar widths (% of total budget)
+  function segPct(grp) {
+    if (!groups[grp] || totalBudget === 0) return 0;
+    return Math.min(100, (groups[grp].spent / totalBudget) * 100);
+  }
+  document.getElementById('summary-seg-bills').style.width = segPct('Bills').toFixed(1) + '%';
+  document.getElementById('summary-seg-living').style.width = segPct('Living').toFixed(1) + '%';
+  document.getElementById('summary-seg-discretionary').style.width = segPct('Discretionary').toFixed(1) + '%';
 
-  // Spent
-  const spentCard = document.getElementById('metric-spent');
-  document.getElementById('spent-value').textContent = formatCurrency(data.totalSpent);
-  const burnRate = data.dayOfMonth > 0 ? data.totalSpent / data.dayOfMonth : 0;
-  document.getElementById('spent-sub').textContent =
-    formatCurrency(Math.round(burnRate)) + '/day avg  ·  Day ' + data.dayOfMonth;
+  var remaining = totalBudget - data.totalSpent;
+  document.getElementById('summary-spent').textContent = formatCurrency(data.totalSpent) + ' spent';
+  document.getElementById('summary-left').textContent = formatCurrency(remaining) + ' left';
 
-  // Remaining
-  const remCard = document.getElementById('metric-remaining');
-  const remStatus = remaining < 0 ? 'red' : remaining < totalBudget * 0.1 ? 'yellow' : null;
-  setStatusClass(remCard, remStatus);
-  document.getElementById('remaining-value').textContent = formatCurrency(remaining);
-  document.getElementById('remaining-sub').textContent =
-    'of ' + formatCurrency(totalBudget) + ' budget';
+  // Legend percentages (% of total spent)
+  function legendPct(grp) {
+    if (!groups[grp] || data.totalSpent === 0) return '0%';
+    return Math.round((groups[grp].spent / data.totalSpent) * 100) + '%';
+  }
+  document.getElementById('legend-bills-pct').textContent = 'Bills ' + legendPct('Bills');
+  document.getElementById('legend-living-pct').textContent = 'Living ' + legendPct('Living');
+  document.getElementById('legend-disc-pct').textContent = 'Discretionary ' + legendPct('Discretionary');
+}
+
+function renderGroupCards(data) {
+  var groups = data.groups || {};
+  var showLag = data.dayOfMonth <= 3;
+  var comparison = CONFIG.historyComparison || 'both';
+
+  function groupStatus(grp) {
+    var g = groups[grp];
+    if (!g || g.budget === 0) return 'green';
+    var pctSpent = g.spent / g.budget;
+    var pctElapsed = data.dayOfMonth / data.daysInMonth;
+    if (g.spent >= g.budget) return 'red';
+    if (pctSpent > pctElapsed + 0.15) return 'yellow';
+    return 'green';
+  }
+
+  function groupRunway(grp) {
+    var g = groups[grp];
+    if (!g || !data.dayOfMonth || !g.spent) return null;
+    var remaining = g.budget - g.spent;
+    if (remaining <= 0) return null;
+    var dailyBurn = g.spent / data.dayOfMonth;
+    return dailyBurn > 0 ? Math.round(remaining / dailyBurn) : null;
+  }
+
+  function diffHtml(current, comparison_val, label) {
+    if (comparison_val === 0) return '';
+    var delta = current - comparison_val;
+    if (delta === 0) return '';
+    var absDelta = Math.abs(delta);
+    var cls = delta > 0 ? 'worse' : delta < 0 ? 'better' : 'neutral';
+    var arrow = delta > 0 ? '↑' : '↓';
+    return '<div class="group-diff ' + cls + '">'
+      + arrow + ' ' + formatCurrency(absDelta)
+      + ' <span class="group-diff-label">vs ' + label + '</span>'
+      + '</div>';
+  }
+
+  var defs = [
+    { id: 'group-bills',         key: 'Bills',         showRunway: false },
+    { id: 'group-living',        key: 'Living',        showRunway: true  },
+    { id: 'group-discretionary', key: 'Discretionary', showRunway: true  }
+  ];
+
+  defs.forEach(function(def) {
+    var el = document.getElementById(def.id);
+    var g = groups[def.key] || { spent: 0, budget: 0, lastMonth: 0, sixMonthAvg: 0 };
+    var status = groupStatus(def.key);
+    var pct = g.budget > 0 ? Math.min(1, g.spent / g.budget) : 0;
+
+    var diffsHtml = '';
+    if (comparison === 'both' || comparison === 'last_month') {
+      diffsHtml += diffHtml(g.spent, g.lastMonth, 'last mo');
+    }
+    if (comparison === 'both' || comparison === 'six_month_avg') {
+      diffsHtml += diffHtml(g.spent, g.sixMonthAvg, '6mo avg');
+    }
+
+    var runwayHtml = '';
+    if (def.showRunway) {
+      var rd = groupRunway(def.key);
+      if (rd !== null) {
+        runwayHtml = '<div class="group-runway">' + rd + 'd runway</div>';
+      }
+    }
+
+    var lagHtml = showLag && diffsHtml
+      ? '<div class="group-lag-note">* comparisons may be incomplete</div>'
+      : '';
+
+    el.innerHTML =
+      '<div class="group-label">' + escHtml(def.key) + '</div>'
+      + '<div class="group-amounts">'
+      +   '<span class="group-spent">' + formatCurrency(g.spent) + '</span>'
+      +   '<span class="group-sep">/</span>'
+      +   '<span class="group-budget">' + formatCurrency(g.budget) + '</span>'
+      + '</div>'
+      + '<div class="group-progress-track">'
+      +   '<div class="group-progress-fill status-' + status + '" style="width:' + (pct * 100).toFixed(1) + '%"></div>'
+      + '</div>'
+      + '<div class="group-diffs">' + diffsHtml + '</div>'
+      + runwayHtml
+      + lagHtml;
+  });
 }
 
 function renderCategories(data) {
@@ -1005,7 +1234,8 @@ function renderFooter(data, isStale) {
 
 function render(data, isStale) {
   document.documentElement.dataset.stale = isStale ? 'true' : 'false';
-  renderMetrics(data);
+  renderSummary(data);
+  renderGroupCards(data);
   renderCategories(data);
   renderGoals(data);
   renderFooter(data, isStale);
@@ -1015,6 +1245,8 @@ function render(data, isStale) {
 
 async function init() {
   document.documentElement.setAttribute('data-theme', CONFIG.theme || 'dark');
+  document.title = CONFIG.pageTitle || 'Budget Dashboard';
+  document.getElementById('wordmark').textContent = CONFIG.headerWordmark || 'BUDGET DASHBOARD';
 
   showRefreshing(true);
   const data = await fetchData();
@@ -1030,7 +1262,8 @@ async function init() {
     loadingScreen.classList.add('hidden');
     setTimeout(() => { loadingScreen.style.display = 'none'; }, 450);
     document.getElementById('no-data').classList.add('visible');
-    document.getElementById('metric-row').style.display = 'none';
+    document.getElementById('summary-section').style.display = 'none';
+    document.getElementById('group-cards').style.display = 'none';
     document.getElementById('category-section').style.display = 'none';
     document.getElementById('goals-section').style.display = 'none';
   }
@@ -1045,7 +1278,8 @@ function startRefresh() {
     showRefreshing(false);
     if (data) {
       document.getElementById('no-data').classList.remove('visible');
-      document.getElementById('metric-row').style.display = '';
+      document.getElementById('summary-section').style.display = '';
+      document.getElementById('group-cards').style.display = '';
       document.getElementById('category-section').style.display = '';
       document.getElementById('goals-section').style.display = '';
       render(data, !!localStorage.getItem('tiller_stale'));
