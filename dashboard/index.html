@@ -61,8 +61,10 @@
 
     html {
       /* Base unit scales with viewport width so the whole layout stays
-         proportional whether this runs on a phone, a tablet, or a wall TV. */
-      font-size: clamp(14px, 0.85vw + 6px, 26px);
+         proportional whether this runs on a phone, a tablet, or a wall TV.
+         --zoom is a user-controlled multiplier on top of that (see #zoom-controls). */
+      --zoom: 1;
+      font-size: calc(clamp(14px, 0.85vw + 6px, 26px) * var(--zoom));
     }
 
     html, body {
@@ -72,7 +74,6 @@
       background: var(--bg);
       color: var(--text-primary);
       font-family: 'Geist', system-ui, sans-serif;
-      font-size: 1rem;
       line-height: 1.4;
       -webkit-font-smoothing: antialiased;
     }
@@ -80,6 +81,7 @@
     body {
       height: 100vh;
       height: 100dvh;
+      font-size: 1rem;
     }
 
     /* ── Layout Shell ───────────────────────────────────────── */
@@ -232,6 +234,54 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    #zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4286rem;
+    }
+
+    .zoom-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.7143rem;
+      height: 1.7143rem;
+      border: 1px solid var(--border);
+      border-radius: 0.2857rem;
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.9286rem;
+      line-height: 1;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .zoom-btn:hover,
+    .zoom-btn:active {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .zoom-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      background: var(--surface);
+      color: var(--text-secondary);
+    }
+
+    #zoom-level {
+      min-width: 2.4286rem;
+      text-align: center;
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.6429rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      cursor: pointer;
     }
 
     /* ── Summary Bar ────────────────────────────────────────── */
@@ -462,36 +512,35 @@
 
     #category-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-auto-rows: 1fr;
-      gap: 0.5714rem;
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
+      align-content: space-evenly;
+      gap: 0.4286rem;
       flex: 1;
       min-height: 0;
+      overflow: auto;
     }
 
+    /* Each category is a single compact list row (dot, name, amount, a
+       small inline meter) so any number of rows stays legible instead of
+       being squeezed or clipped when stretched to fill the grid. */
     .cat-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 0.4286rem;
-      padding: 0.7857rem 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 0.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cat-card-header {
+      padding: 0.4286rem 1.1429rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.5714rem;
+      gap: 0.8571rem;
+      position: relative;
     }
 
     .cat-name {
-      font-size: 0.8571rem;
+      flex: 1;
+      min-width: 0;
+      font-size: 0.9286rem;
       font-weight: 500;
+      line-height: 1.2;
       color: var(--text-primary);
       letter-spacing: 0.01em;
       white-space: nowrap;
@@ -526,11 +575,12 @@
       display: flex;
       align-items: baseline;
       gap: 0.3571rem;
+      flex-shrink: 0;
     }
 
     .cat-spent {
       font-family: 'Geist Mono', monospace;
-      font-size: 1.4286rem;
+      font-size: 1.1429rem;
       font-weight: 600;
       line-height: 1;
       letter-spacing: -0.02em;
@@ -560,6 +610,7 @@
       text-transform: uppercase;
       padding: 0.1429rem 0.3571rem;
       border-radius: 0.1429rem;
+      flex-shrink: 0;
     }
 
     .cat-tag.pacing {
@@ -575,11 +626,12 @@
     }
 
     .cat-progress-track {
-      height: 0.2143rem;
+      width: 8.5714rem;
+      flex-shrink: 0;
+      height: 0.2857rem;
       background: var(--border);
       border-radius: 0.1429rem;
       overflow: hidden;
-      margin-top: 0.1429rem;
     }
 
     .cat-progress-fill {
@@ -804,8 +856,12 @@
     @media (max-width: 640px) {
       html, body { overflow-y: auto; }
       #app { height: auto; min-height: 100%; }
+      #status-bar { height: auto; flex-wrap: wrap; row-gap: 0.5rem; }
+      #status-bar-right { flex-wrap: wrap; justify-content: flex-end; width: 100%; }
       #group-cards { grid-template-columns: 1fr; }
-      #category-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
+      #category-grid { grid-auto-rows: auto; }
+      .cat-card { flex-wrap: wrap; }
+      .cat-progress-track { width: 100%; order: 1; }
     }
   </style>
 </head>
@@ -832,6 +888,11 @@
         Cached data
       </div>
       <div id="refresh-indicator">Refreshing</div>
+      <div id="zoom-controls">
+        <button type="button" class="zoom-btn" id="zoom-out" aria-label="Zoom out">−</button>
+        <span id="zoom-level" title="Reset zoom">100%</span>
+        <button type="button" class="zoom-btn" id="zoom-in" aria-label="Zoom in">+</button>
+      </div>
     </div>
   </div>
 
@@ -1012,6 +1073,38 @@ function setStatusClass(el, status) {
   if (status) el.classList.add('status-' + status);
 }
 
+/* ── Zoom controls ────────────────────────────────────────────── */
+
+var ZOOM_MIN = 0.8;
+var ZOOM_MAX = 1.6;
+var ZOOM_STEP = 0.1;
+var ZOOM_STORAGE_KEY = 'tiller_zoom';
+
+function setZoom(zoom) {
+  zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(zoom * 100) / 100));
+  document.documentElement.style.setProperty('--zoom', zoom);
+  localStorage.setItem(ZOOM_STORAGE_KEY, String(zoom));
+  document.getElementById('zoom-level').textContent = Math.round(zoom * 100) + '%';
+  document.getElementById('zoom-out').disabled = zoom <= ZOOM_MIN;
+  document.getElementById('zoom-in').disabled = zoom >= ZOOM_MAX;
+  return zoom;
+}
+
+function initZoomControls() {
+  var saved = parseFloat(localStorage.getItem(ZOOM_STORAGE_KEY));
+  var zoom = setZoom(isNaN(saved) ? 1 : saved);
+
+  document.getElementById('zoom-in').addEventListener('click', function() {
+    zoom = setZoom(zoom + ZOOM_STEP);
+  });
+  document.getElementById('zoom-out').addEventListener('click', function() {
+    zoom = setZoom(zoom - ZOOM_STEP);
+  });
+  document.getElementById('zoom-level').addEventListener('click', function() {
+    zoom = setZoom(1);
+  });
+}
+
 /* ── Renderers ────────────────────────────────────────────────── */
 
 function renderSummary(data) {
@@ -1149,18 +1242,14 @@ function renderCategories(data) {
     }
 
     card.innerHTML = `
-      <div class="cat-card-header">
-        <span class="cat-name">${escHtml(cat.name)}</span>
-        <span class="cat-status-dot status-${status}"></span>
+      <span class="cat-status-dot status-${status}"></span>
+      <span class="cat-name">${escHtml(cat.name)}</span>
+      <div class="cat-amounts">
+        <span class="cat-spent">${formatCurrency(spent)}</span>
+        <span class="cat-sep">/</span>
+        <span class="cat-budget">${formatCurrency(budget)}</span>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
-        <div class="cat-amounts">
-          <span class="cat-spent">${formatCurrency(spent)}</span>
-          <span class="cat-sep">/</span>
-          <span class="cat-budget">${formatCurrency(budget)}</span>
-        </div>
-        ${tagHtml}
-      </div>
+      ${tagHtml}
       <div class="cat-progress-track">
         <div class="cat-progress-fill status-${status}" style="width:${(pct * 100).toFixed(1)}%"></div>
       </div>
@@ -1271,6 +1360,7 @@ async function init() {
   document.documentElement.setAttribute('data-theme', CONFIG.theme || 'dark');
   document.title = CONFIG.pageTitle || 'Budget Dashboard';
   document.getElementById('wordmark').textContent = CONFIG.headerWordmark || 'BUDGET DASHBOARD';
+  initZoomControls();
 
   showRefreshing(true);
   const data = await fetchData();
