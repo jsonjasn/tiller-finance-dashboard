@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark" data-stale="false">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1024">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Budget Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,25 +59,38 @@
       padding: 0;
     }
 
+    html {
+      /* Base unit scales with viewport width so the whole layout stays
+         proportional whether this runs on a phone, a tablet, or a wall TV. */
+      font-size: clamp(14px, 0.85vw + 6px, 26px);
+    }
+
     html, body {
-      width: 1024px;
-      height: 768px;
+      width: 100%;
+      min-height: 100%;
       overflow: hidden;
       background: var(--bg);
       color: var(--text-primary);
       font-family: 'Geist', system-ui, sans-serif;
-      font-size: 14px;
+      font-size: 1rem;
       line-height: 1.4;
       -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
     }
 
     /* ── Layout Shell ───────────────────────────────────────── */
     #app {
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      padding: 18px 20px 12px;
-      gap: 14px;
+      height: 100%;
+      max-width: 90rem;
+      margin: 0 auto;
+      padding: 1.2857rem 1.4286rem 0.8571rem;
+      gap: 1rem;
     }
 
     /* ── Loading State ──────────────────────────────────────── */
@@ -101,12 +114,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 1.1429rem;
     }
 
     .loading-wordmark {
       font-family: 'Geist Mono', monospace;
-      font-size: 11px;
+      font-size: 0.7857rem;
       font-weight: 500;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -115,13 +128,13 @@
 
     .loading-pulse {
       display: flex;
-      gap: 6px;
+      gap: 0.4286rem;
       align-items: center;
     }
 
     .loading-pulse span {
-      width: 4px;
-      height: 4px;
+      width: 0.2857rem;
+      height: 0.2857rem;
       border-radius: 50%;
       background: var(--text-secondary);
       animation: pulse-dot 1.2s ease-in-out infinite;
@@ -140,13 +153,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 20px;
+      height: 1.4286rem;
       flex-shrink: 0;
     }
 
     #wordmark {
       font-family: 'Geist Mono', monospace;
-      font-size: 10px;
+      font-size: 0.7143rem;
       font-weight: 500;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -157,23 +170,23 @@
     #status-bar-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 1rem;
     }
 
     #stale-badge {
       display: none;
       align-items: center;
-      gap: 5px;
+      gap: 0.3571rem;
       font-family: 'Geist Mono', monospace;
-      font-size: 9px;
+      font-size: 0.6429rem;
       font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--yellow);
       background: var(--stale-bg);
       border: 1px solid var(--stale-border);
-      border-radius: 3px;
-      padding: 3px 7px;
+      border-radius: 0.2143rem;
+      padding: 0.2143rem 0.5rem;
     }
 
     [data-stale="true"] #stale-badge {
@@ -181,8 +194,8 @@
     }
 
     .stale-dot {
-      width: 5px;
-      height: 5px;
+      width: 0.3571rem;
+      height: 0.3571rem;
       border-radius: 50%;
       background: var(--yellow);
       animation: stale-blink 2s ease-in-out infinite;
@@ -195,7 +208,7 @@
 
     #refresh-indicator {
       font-family: 'Geist Mono', monospace;
-      font-size: 9px;
+      font-size: 0.6429rem;
       font-weight: 400;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -204,13 +217,13 @@
       transition: opacity 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 0.3571rem;
     }
 
     #refresh-indicator::before {
       content: '';
-      width: 5px;
-      height: 5px;
+      width: 0.3571rem;
+      height: 0.3571rem;
       border: 1.5px solid var(--text-secondary);
       border-top-color: transparent;
       border-radius: 50%;
@@ -225,24 +238,24 @@
     #summary-section {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 0.4286rem;
       flex-shrink: 0;
     }
 
     #summary-bar {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 1rem;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 16px;
+      border-radius: 0.4286rem;
+      padding: 0.7143rem 1.1429rem;
     }
 
     #summary-bar-track {
       flex: 1;
-      height: 8px;
-      border-radius: 4px;
+      height: 0.5714rem;
+      border-radius: 0.2857rem;
       background: var(--border);
       display: flex;
       overflow: hidden;
@@ -260,9 +273,9 @@
     #summary-numbers {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 0.4286rem;
       font-family: 'Geist Mono', monospace;
-      font-size: 13px;
+      font-size: 0.9286rem;
       font-weight: 500;
       white-space: nowrap;
     }
@@ -273,25 +286,25 @@
 
     #summary-legend {
       display: flex;
-      gap: 12px;
-      padding: 0 2px;
+      gap: 0.8571rem;
+      padding: 0 0.1429rem;
     }
 
     .legend-pill {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 0.3571rem;
       font-family: 'Geist Mono', monospace;
-      font-size: 9px;
+      font-size: 0.6429rem;
       font-weight: 500;
       letter-spacing: 0.12em;
       color: var(--text-secondary);
     }
 
     .legend-swatch {
-      width: 7px;
-      height: 7px;
-      border-radius: 2px;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 0.1429rem;
     }
 
     .legend-pill.bills          .legend-swatch { background: var(--blue); }
@@ -302,18 +315,18 @@
     #group-cards {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      gap: 0.7143rem;
       flex-shrink: 0;
     }
 
     .group-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px 16px;
+      border-radius: 0.4286rem;
+      padding: 1rem 1.1429rem;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0.5714rem;
       position: relative;
       overflow: hidden;
     }
@@ -322,7 +335,7 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 2px;
+      height: 0.1429rem;
     }
 
     #group-bills::before         { background: var(--blue); }
@@ -331,7 +344,7 @@
 
     .group-label {
       font-family: 'Geist Mono', monospace;
-      font-size: 9px;
+      font-size: 0.6429rem;
       font-weight: 500;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -341,12 +354,12 @@
     .group-amounts {
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 0.3571rem;
     }
 
     .group-spent {
       font-family: 'Geist Mono', monospace;
-      font-size: 22px;
+      font-size: 1.5714rem;
       font-weight: 600;
       line-height: 1;
       letter-spacing: -0.02em;
@@ -355,29 +368,29 @@
 
     .group-sep {
       font-family: 'Geist Mono', monospace;
-      font-size: 12px;
+      font-size: 0.8571rem;
       color: var(--text-secondary);
       opacity: 0.4;
     }
 
     .group-budget {
       font-family: 'Geist Mono', monospace;
-      font-size: 13px;
+      font-size: 0.9286rem;
       font-weight: 400;
       color: var(--text-secondary);
       letter-spacing: -0.01em;
     }
 
     .group-progress-track {
-      height: 3px;
+      height: 0.2143rem;
       background: var(--border);
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       overflow: hidden;
     }
 
     .group-progress-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -388,17 +401,17 @@
     .group-diffs {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 0.1429rem;
     }
 
     .group-diff {
       font-family: 'Geist Mono', monospace;
-      font-size: 10px;
+      font-size: 0.7143rem;
       font-weight: 500;
       letter-spacing: 0.02em;
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 0.2143rem;
     }
 
     .group-diff.better { color: var(--green); }
@@ -413,19 +426,19 @@
 
     .group-runway {
       font-family: 'Geist Mono', monospace;
-      font-size: 10px;
+      font-size: 0.7143rem;
       font-weight: 500;
       color: var(--text-secondary);
       letter-spacing: 0.04em;
-      margin-top: 2px;
+      margin-top: 0.1429rem;
     }
 
     .group-lag-note {
-      font-size: 9px;
+      font-size: 0.6429rem;
       color: var(--text-secondary);
       opacity: 0.45;
       letter-spacing: 0.02em;
-      margin-top: 1px;
+      margin-top: 0.0714rem;
     }
 
     /* ── Category Grid ──────────────────────────────────────── */
@@ -434,12 +447,12 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 0.5rem;
     }
 
     .section-label {
       font-family: 'Geist Mono', monospace;
-      font-size: 9px;
+      font-size: 0.6429rem;
       font-weight: 500;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -451,7 +464,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-auto-rows: 1fr;
-      gap: 8px;
+      gap: 0.5714rem;
       flex: 1;
       min-height: 0;
     }
@@ -459,11 +472,12 @@
     .cat-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 11px 14px;
+      border-radius: 0.4286rem;
+      padding: 0.7857rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      justify-content: space-between;
+      gap: 0.5rem;
       position: relative;
       overflow: hidden;
     }
@@ -472,11 +486,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.5714rem;
     }
 
     .cat-name {
-      font-size: 12px;
+      font-size: 0.8571rem;
       font-weight: 500;
       color: var(--text-primary);
       letter-spacing: 0.01em;
@@ -486,8 +500,8 @@
     }
 
     .cat-status-dot {
-      width: 8px;
-      height: 8px;
+      width: 0.5714rem;
+      height: 0.5714rem;
       border-radius: 50%;
       flex-shrink: 0;
       background: var(--cat-color, var(--text-secondary));
@@ -511,12 +525,12 @@
     .cat-amounts {
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 0.3571rem;
     }
 
     .cat-spent {
       font-family: 'Geist Mono', monospace;
-      font-size: 20px;
+      font-size: 1.4286rem;
       font-weight: 600;
       line-height: 1;
       letter-spacing: -0.02em;
@@ -525,14 +539,14 @@
 
     .cat-sep {
       font-family: 'Geist Mono', monospace;
-      font-size: 12px;
+      font-size: 0.8571rem;
       color: var(--text-secondary);
       opacity: 0.4;
     }
 
     .cat-budget {
       font-family: 'Geist Mono', monospace;
-      font-size: 13px;
+      font-size: 0.9286rem;
       font-weight: 400;
       color: var(--text-secondary);
       letter-spacing: -0.01em;
@@ -540,12 +554,12 @@
 
     .cat-tag {
       font-family: 'Geist Mono', monospace;
-      font-size: 8px;
+      font-size: 0.5714rem;
       font-weight: 500;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      padding: 2px 5px;
-      border-radius: 2px;
+      padding: 0.1429rem 0.3571rem;
+      border-radius: 0.1429rem;
     }
 
     .cat-tag.pacing {
@@ -561,16 +575,16 @@
     }
 
     .cat-progress-track {
-      height: 3px;
+      height: 0.2143rem;
       background: var(--border);
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       overflow: hidden;
-      margin-top: 2px;
+      margin-top: 0.1429rem;
     }
 
     .cat-progress-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       background: var(--fill-color, var(--green));
       transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -583,24 +597,24 @@
     #goals-section {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 0.5rem;
       flex-shrink: 0;
     }
 
     #goals-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(15.7143rem, 1fr));
+      gap: 0.5714rem;
     }
 
     .goal-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px;
+      border-radius: 0.4286rem;
+      padding: 0.8571rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0.5714rem;
       position: relative;
       overflow: hidden;
     }
@@ -610,8 +624,8 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 40px;
-      height: 40px;
+      width: 2.8571rem;
+      height: 2.8571rem;
       background: radial-gradient(circle at top right, var(--goal-accent, transparent), transparent 70%);
       pointer-events: none;
     }
@@ -623,11 +637,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.5714rem;
     }
 
     .goal-label {
-      font-size: 12px;
+      font-size: 0.8571rem;
       font-weight: 500;
       color: var(--text-primary);
       letter-spacing: 0.01em;
@@ -635,12 +649,12 @@
 
     .goal-type-badge {
       font-family: 'Geist Mono', monospace;
-      font-size: 8px;
+      font-size: 0.5714rem;
       font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      padding: 2px 5px;
-      border-radius: 2px;
+      padding: 0.1429rem 0.3571rem;
+      border-radius: 0.1429rem;
     }
 
     .goal-type-badge.payoff {
@@ -657,7 +671,7 @@
 
     .goal-main-value {
       font-family: 'Geist Mono', monospace;
-      font-size: 22px;
+      font-size: 1.5714rem;
       font-weight: 600;
       line-height: 1;
       letter-spacing: -0.02em;
@@ -665,22 +679,22 @@
     }
 
     .goal-main-label {
-      font-size: 10px;
+      font-size: 0.7143rem;
       color: var(--text-secondary);
       letter-spacing: 0.02em;
-      margin-top: 2px;
+      margin-top: 0.1429rem;
     }
 
     .goal-progress-track {
-      height: 4px;
+      height: 0.2857rem;
       background: var(--border);
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       overflow: hidden;
     }
 
     .goal-progress-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 0.1429rem;
       transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -689,26 +703,26 @@
 
     .goal-meta {
       display: flex;
-      gap: 14px;
+      gap: 1rem;
       align-items: flex-start;
     }
 
     .goal-stat {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 0.0714rem;
     }
 
     .goal-stat-value {
       font-family: 'Geist Mono', monospace;
-      font-size: 12px;
+      font-size: 0.8571rem;
       font-weight: 500;
       color: var(--text-primary);
       letter-spacing: -0.01em;
     }
 
     .goal-stat-label {
-      font-size: 9px;
+      font-size: 0.6429rem;
       color: var(--text-secondary);
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -717,12 +731,12 @@
     .goal-on-track {
       margin-left: auto;
       font-family: 'Geist Mono', monospace;
-      font-size: 8px;
+      font-size: 0.5714rem;
       font-weight: 500;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 2px;
+      padding: 0.1429rem 0.4286rem;
+      border-radius: 0.1429rem;
     }
 
     .goal-on-track.on { color: var(--green); background: var(--green-tint); border: 1px solid var(--green-tint); }
@@ -733,14 +747,14 @@
       display: none;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 0.7143rem;
       flex-shrink: 0;
-      height: 18px;
+      height: 1.2857rem;
     }
 
     #footer-updated {
       font-family: 'Geist Mono', monospace;
-      font-size: 10px;
+      font-size: 0.7143rem;
       font-weight: 400;
       color: var(--text-secondary);
       opacity: 0.5;
@@ -748,15 +762,15 @@
     }
 
     #footer-lag {
-      font-size: 10px;
+      font-size: 0.7143rem;
       color: var(--text-secondary);
       opacity: 0.35;
       letter-spacing: 0.02em;
     }
 
     #footer-sep {
-      width: 1px;
-      height: 10px;
+      width: 0.0714rem;
+      height: 0.7143rem;
       background: var(--border);
       opacity: 0.5;
     }
@@ -768,7 +782,7 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: 10px;
+      gap: 0.7143rem;
     }
 
     #no-data.visible {
@@ -777,11 +791,21 @@
 
     .no-data-label {
       font-family: 'Geist Mono', monospace;
-      font-size: 11px;
+      font-size: 0.7857rem;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--text-secondary);
       opacity: 0.5;
+    }
+
+    /* ── Small screens ──────────────────────────────────────── */
+    /* Allow scrolling instead of clipping content, and stack the
+       ambient grids down to something legible on a narrow screen. */
+    @media (max-width: 640px) {
+      html, body { overflow-y: auto; }
+      #app { height: auto; min-height: 100%; }
+      #group-cards { grid-template-columns: 1fr; }
+      #category-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
     }
   </style>
 </head>
